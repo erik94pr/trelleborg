@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trelleborg → Ystad · Statistik</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --border: #e2e5ed;
+  --text: #1a1d2a;
+  --muted: #8a90a8;
+  --accent: #2563eb;
+  --accent-bg: #eff4ff;
+  --green: #16a34a;
+  --s7200: #2563eb;
+  --s7210: #dc2626;
+  --s7220: #d97706;
+  --bar-bg: #e8edf5;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+h1 .arrow { color: var(--accent); }
+
+.tabs {
+  display: flex;
+  gap: 0.3rem;
+  background: var(--bg);
+  padding: 0.3rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.tab {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+/* Summary */
+.summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.stat-value.blue { color: var(--accent); }
+.stat-value.green { color: var(--green); }
+.stat-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+/* Plats card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.plats-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.plats-row:last-child { border-bottom: none; }
+.plats-row:hover { background: #f8f9fc; }
+.plats-row.ystad-row { background: var(--accent-bg); }
+.plats-row.ystad-row:hover { background: #e5eeff; }
+
+.plats-name {
+  font-weight: 600;
+  width: 110px;
+  flex-shrink: 0;
+  font-size: 0.88rem;
+}
+.plats-row.ystad-row .plats-name { color: var(--accent); }
+
+.bar-wrap {
+  flex: 1;
+  height: 7px;
+  background: var(--bar-bg);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar {
+  height: 100%;
+  border-radius: 99px;
+  background: #c5cde0;
+  transition: width 0.4s ease;
+}
+.plats-row.ystad-row .bar { background: var(--accent); }
+
+.plats-n {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 30px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.plats-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--muted);
+  width: 46px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.plats-row.ystad-row .plats-pct { color: var(--accent); font-weight: 600; }
+
+/* Diag table */
+.diag-head {
+  display: grid;
+  grid-template-columns: 72px 1fr 60px 60px 110px;
+  padding: 0.55rem 1.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+}
+.th {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.th.r { text-align: right; }
+
+.diag-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 60px 60px 110px;
+  padding: 0.8rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  gap: 0.5rem;
+}
+.diag-row:last-child { border-bottom: none; }
+.diag-row:hover { background: #f8f9fc; }
+.diag-row.hip-row { background: #f8fbff; }
+.diag-row.hip-row:hover { background: #eff4ff; }
+
+.diag-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.s7200 .diag-code { color: var(--s7200); }
+.s7210 .diag-code { color: var(--s7210); }
+.s7220 .diag-code { color: var(--s7220); }
+
+.diag-text {
+  font-size: 0.81rem;
+  line-height: 1.35;
+}
+
+.diag-n {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.diag-tot {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.pct-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+.pct-bar-wrap {
+  flex: 1;
+  height: 5px;
+  background: var(--bar-bg);
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 24px;
+}
+.pct-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: #c5cde0;
+}
+.s7200 .pct-bar { background: var(--s7200); }
+.s7210 .pct-bar { background: var(--s7210); }
+.s7220 .pct-bar { background: var(--s7220); }
+
+.pct-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+  color: var(--muted);
+}
+.s7200 .pct-val { color: var(--s7200); }
+.s7210 .pct-val { color: var(--s7210); }
+.s7220 .pct-val { color: var(--s7220); }
+
+@media (max-width: 580px) {
+  header { padding: 1rem; }
+  main { padding: 1rem 0.75rem 2rem; }
+  .diag-head, .diag-row { grid-template-columns: 68px 1fr 52px 100px; }
+  .diag-tot { display: none; }
+  .summary { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="eyebrow">Ystad Sjukhus · Ortopedkliniken</div>
+    <h1>Trelleborg <span class="arrow">→</span> Ystad &nbsp;·&nbsp; Operationsstatistik</h1>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="setYear('alla',this)">Alla år</button>
+    <button class="tab" onclick="setYear(2025,this)">2025</button>
+    <button class="tab" onclick="setYear(2026,this)">2026</button>
+  </div>
+</header>
+
+<main>
+
+  <div>
+    <div class="section-label">Översikt</div>
+    <div class="summary">
+      <div>
+        <div class="stat-label">Totalt Trelleborg</div>
+        <div class="stat-value" id="s-tot">—</div>
+        <div class="stat-sub">alla operationer</div>
+      </div>
+      <div>
+        <div class="stat-label">Opererade i Ystad</div>
+        <div class="stat-value blue" id="s-ystad">—</div>
+        <div class="stat-sub" id="s-ystad-sub">— av totalt</div>
+      </div>
+      <div>
+        <div class="stat-label">Höftfrakturer i Ystad</div>
+        <div class="stat-value green" id="s-hip">—</div>
+        <div class="stat-sub">S7200 + S7210 + S7220</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Andel operationer per sjukhus · Trelleborgspatienter</div>
+    <div class="card" id="plats-list"></div>
+  </div>
+
+  <div>
+    <div class="section-label">Diagnoser opererade i Ystad &nbsp;—&nbsp; antal och andel av totalt (alla sjukhus)</div>
+    <div class="card">
+      <div class="diag-head">
+        <div class="th">Kod</div>
+        <div class="th">Diagnos</div>
+        <div class="th r">Ystad</div>
+        <div class="th r">Totalt</div>
+        <div class="th r">Andel</div>
+      </div>
+      <div id="diag-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const HIP = ['S7200','S7210','S7220'];
+
+const platsByYear = [
+  {År:2025,Plats:'Ystad',Antal:124},{År:2025,Plats:'Malmö',Antal:117},
+  {År:2025,Plats:'Trelleborg',Antal:72},{År:2025,Plats:'Lund',Antal:30},
+  {År:2025,Plats:'Hässleholm',Antal:3},{År:2025,Plats:'CSK',Antal:2},
+  {År:2026,Plats:'Malmö',Antal:44},{År:2026,Plats:'Ystad',Antal:37},
+  {År:2026,Plats:'Trelleborg',Antal:29},{År:2026,Plats:'Lund',Antal:10},
+  {År:2026,Plats:'Hässleholm',Antal:1},
+];
+
+const diagByYear = [
+  {År:2025,kod:'S7200',text:'Kollumfraktur - sluten',ystad:44,total:52},
+  {År:2025,kod:'S7210',text:'Pertrokantär fraktur - sluten',ystad:27,total:36},
+  {År:2025,kod:'Z470', text:'Eftervård med borttagande av osteosyntesmaterial',ystad:8,total:11},
+  {År:2025,kod:'S7220',text:'Subtrokantär fraktur - sluten',ystad:6,total:9},
+  {År:2025,kod:'S5250',text:'Fraktur på nedre delen av radius - sluten',ystad:5,total:21},
+  {År:2025,kod:'S761', text:'Skada på quadricepsmuskel och dess sena',ystad:5,total:7},
+  {År:2025,kod:'S8260',text:'Fraktur på laterala malleolen - sluten',ystad:3,total:5},
+  {År:2025,kod:'T846F',text:'Infektion/inflammation av fixationsinstrument i höftled',ystad:3,total:5},
+  {År:2025,kod:'I702', text:'Ateroskleros i extremitetsartärer',ystad:2,total:6},
+  {År:2025,kod:'S5200',text:'Fraktur på övre delen av ulna - sluten',ystad:2,total:7},
+  {År:2025,kod:'S8280',text:'Frakturer på andra delar av underben - sluten',ystad:2,total:15},
+  {År:2025,kod:'I702C',text:'Perifer ateroskleros med bensår',ystad:1,total:5},
+  {År:2025,kod:'I743', text:'Emboli och trombos i nedre extremitetsartärer',ystad:1,total:2},
+  {År:2025,kod:'M243', text:'Patologisk luxation i led',ystad:1,total:1},
+  {År:2025,kod:'M841F',text:'Utebliven läkning/pseudartros i höftled',ystad:1,total:1},
+  {År:2025,kod:'M842F',text:'Fördröjd frakturläkning i höftled',ystad:1,total:1},
+  {År:2025,kod:'S4200',text:'Nyckelbensfraktur - sluten',ystad:1,total:2},
+  {År:2025,kod:'S430', text:'Luxation i skulderled',ystad:1,total:1},
+  {År:2025,kod:'S468', text:'Skada på muskler/senor skulder/överarm',ystad:1,total:5},
+  {År:2025,kod:'S5210',text:'Fraktur på övre delen av radius - sluten',ystad:1,total:4},
+  {År:2025,kod:'S5240',text:'Fraktur skaftet ulna+radius - sluten',ystad:1,total:3},
+  {År:2025,kod:'S5241',text:'Fraktur skaftet ulna+radius - öppen',ystad:1,total:1},
+  {År:2025,kod:'S8200',text:'Fraktur på patella - sluten',ystad:1,total:1},
+  {År:2025,kod:'S8210',text:'Fraktur på övre delen av tibia - sluten',ystad:1,total:3},
+  {År:2025,kod:'S8250',text:'Fraktur på mediala malleolen - sluten',ystad:1,total:1},
+  {År:2025,kod:'S9230',text:'Fraktur på metatarsalben - sluten',ystad:1,total:3},
+  {År:2025,kod:'T843F',text:'Mekanisk komplikation av implantat i höftled',ystad:1,total:1},
+  {År:2025,kod:'T846C',text:'Infektion av fixationsinstrument i armbåge/underarm',ystad:1,total:1},
+  {År:2026,kod:'S7200',text:'Kollumfraktur - sluten',ystad:12,total:17},
+  {År:2026,kod:'S7210',text:'Pertrokantär fraktur - sluten',ystad:10,total:11},
+  {År:2026,kod:'S7220',text:'Subtrokantär fraktur - sluten',ystad:3,total:5},
+  {År:2026,kod:'S5250',text:'Fraktur på nedre delen av radius - sluten',ystad:2,total:15},
+  {År:2026,kod:'T846F',text:'Infektion/inflammation av fixationsinstrument i höftled',ystad:2,total:2},
+  {År:2026,kod:'Z470', text:'Eftervård med borttagande av osteosyntesmaterial',ystad:2,total:6},
+  {År:2026,kod:'M966F',text:'Fraktur efter implantatkirurgi i höftled/lårben',ystad:1,total:1},
+  {År:2026,kod:'S430', text:'Luxation i skulderled',ystad:1,total:1},
+  {År:2026,kod:'S5200',text:'Fraktur på övre delen av ulna - sluten',ystad:1,total:2},
+  {År:2026,kod:'S7230',text:'Fraktur på femurskaftet - sluten',ystad:1,total:3},
+  {År:2026,kod:'S8260',text:'Fraktur på laterala malleolen - sluten',ystad:1,total:2},
+  {År:2026,kod:'S8280',text:'Frakturer på andra delar av underben - sluten',ystad:1,total:2},
+];
+
+let activeYear = 'alla';
+
+function mergeByKey(arr, key, fields) {
+  const map = {};
+  arr.forEach(d => {
+    const k = d[key];
+    if (!map[k]) map[k] = {...d};
+    else fields.forEach(f => map[k][f] += d[f]);
+  });
+  return Object.values(map);
+}
+
+function render() {
+  const plats = (activeYear === 'alla'
+    ? mergeByKey(platsByYear, 'Plats', ['Antal'])
+    : platsByYear.filter(d => d.År === activeYear)
+  ).sort((a,b) => b.Antal - a.Antal);
+
+  const diag = (activeYear === 'alla'
+    ? mergeByKey(diagByYear, 'kod', ['ystad','total'])
+    : diagByYear.filter(d => d.År === activeYear)
+  ).sort((a,b) => b.ystad - a.ystad);
+
+  const total = plats.reduce((s,d) => s+d.Antal, 0);
+  const ystadRow = plats.find(d => d.Plats === 'Ystad');
+  const ystadN = ystadRow ? ystadRow.Antal : 0;
+  const ystadPct = total ? (ystadN/total*100).toFixed(1) : 0;
+  const hipN = diag.filter(d => HIP.includes(d.kod)).reduce((s,d) => s+d.ystad, 0);
+
+  document.getElementById('s-tot').textContent = total;
+  document.getElementById('s-ystad').textContent = ystadN;
+  document.getElementById('s-ystad-sub').textContent = `${ystadPct}% av totalt`;
+  document.getElementById('s-hip').textContent = hipN;
+
+  const maxPlats = Math.max(...plats.map(d => d.Antal));
+  document.getElementById('plats-list').innerHTML = plats.map(d => {
+    const pct = total ? (d.Antal/total*100).toFixed(1) : 0;
+    const bw = maxPlats ? (d.Antal/maxPlats*100).toFixed(0) : 0;
+    const isY = d.Plats === 'Ystad';
+    return `<div class="plats-row${isY?' ystad-row':''}">
+      <div class="plats-name">${d.Plats}</div>
+      <div class="bar-wrap"><div class="bar" style="width:${bw}%"></div></div>
+      <div class="plats-n">${d.Antal}</div>
+      <div class="plats-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('diag-list').innerHTML = diag.map(d => {
+    const pct = d.total ? d.ystad/d.total*100 : 0;
+    const isHip = HIP.includes(d.kod);
+    const cls = d.kod==='S7200'?'s7200':d.kod==='S7210'?'s7210':d.kod==='S7220'?'s7220':'';
+    return `<div class="diag-row${isHip?' hip-row ':' '}${cls}">
+      <div class="diag-code">${d.kod}</div>
+      <div class="diag-text">${d.text}</div>
+      <div class="diag-n">${d.ystad}</div>
+      <div class="diag-tot">${d.total}</div>
+      <div class="pct-cell">
+        <div class="pct-bar-wrap"><div class="pct-bar" style="width:${pct.toFixed(0)}%"></div></div>
+        <div class="pct-val">${pct.toFixed(1)}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setYear(y, el) {
+  activeYear = y;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
